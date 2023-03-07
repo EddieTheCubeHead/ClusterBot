@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+  discord:
+    build: .
+    hostname: bot
+    volumes:
+      - ./persistence:/app/persistence
