@@ -52,8 +52,9 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           envs: IMAGE_NAME,REGISTRY,{{ secrets.DIGITAL_OCEAN_API_KEY }},GITHUB_SHA
           script:
-            docker login -u ${{ secrets.DIGITAL_OCEAN_API_KEY }} -p ${{ secrets.DIGITAL_OCEAN_API_KEY }} registry.digitalocean.com
+            docker login -u ${{ secrets.DIGITAL_OCEAN_API_KEY }} -p ${{ secrets.DIGITAL_OCEAN_API_KEY }} \
+            registry.digitalocean.com
             docker stop $(echo $IMAGE_NAME)
             docker rm $(echo $IMAGE_NAME)
             docker run -d --restart always --name $(echo $IMAGE_NAME) --build-arg BOT_TOKEN=${{ secrets.TOKEN }} \
-            $(echo REGISTRY_URL)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            $(echo $REGISTRY_URL)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
