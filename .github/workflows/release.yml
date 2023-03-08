@@ -43,7 +43,7 @@ jobs:
     needs: build_and_push
 
     steps:
-      - name: Deploy to droplet
+      - name: Deploy to digitalocean droplet
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST_IP }}
