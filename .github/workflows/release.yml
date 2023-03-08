@@ -47,10 +47,9 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST_IP }}
-          username: ${{ secrets.SSH_USERNAME }}
+          username: ${{ secrets.DIGITAL_OCEAN_USER }}
           key: ${{ secrets.SSHKEY }}
-          debug: true
-          passphrase: ${{ secrets.PASSPHRASE }}
+          password: ${{ secrets.DIGITAL_OCEAN_PASSWORD }}
           envs: IMAGE_NAME,REGISTRY_URL,{{ secrets.DIGITAL_OCEAN_API_KEY }},GITHUB_SHA
           script: |
             docker login -u ${{ secrets.DIGITAL_OCEAN_API_KEY }} -p ${{ secrets.DIGITAL_OCEAN_API_KEY }} registry.digitalocean.com
