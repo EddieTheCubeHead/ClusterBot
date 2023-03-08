@@ -49,6 +49,7 @@ jobs:
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSHKEY }}
+          debug: true
           passphrase: ${{ secrets.PASSPHRASE }}
           envs: IMAGE_NAME,REGISTRY_URL,{{ secrets.DIGITAL_OCEAN_API_KEY }},GITHUB_SHA
           script: |
