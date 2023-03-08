@@ -49,7 +49,7 @@ jobs:
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          passphrase: ${{ secrets.PASSPHRASE }}
           envs: IMAGE_NAME,REGISTRY_URL,{{ secrets.DIGITAL_OCEAN_API_KEY }},GITHUB_SHA
           script: |
             docker login -u ${{ secrets.DIGITAL_OCEAN_API_KEY }} -p ${{ secrets.DIGITAL_OCEAN_API_KEY }} registry.digitalocean.com
