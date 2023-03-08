@@ -1,6 +1,6 @@
-version: "3.7"
+version: "4.17"
 services:
-  discord:
+  bot:
     build: .
     hostname: bot
     volumes:
