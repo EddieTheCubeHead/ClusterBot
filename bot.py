@@ -6,19 +6,12 @@ from discord import Client, Intents, Interaction
 from discord.app_commands import CommandTree
 
 
-class SecretManager:
-    def __init__(self, file_name: str):
-        with open(file_name, "r", encoding="utf-8") as secret_file:
-            self._secrets: dict[str, str | int] = json.loads(secret_file.read())
-
-    def get_secret(self, secret_name: str) -> str | int:
-        secret = os.getenv(secret_name, None)
-        if secret is None:
-            secret = self._secrets[secret_name]
-        return secret
-
-
-secret_manager = SecretManager("dev_secrets.json")
+def get_secret(secret_name: str) -> str | int:
+    secret = os.getenv(secret_name, None)
+    if secret is None:
+        with open("dev_secrets.json", "r", encoding="utf-8") as secret_file:
+            secret = json.loads(secret_file.read())[secret_name]
+    return secret
 
 
 class Bot(Client):
@@ -33,7 +26,7 @@ class Bot(Client):
 
 
 def setup_bot() -> Bot:
-    guild = discord.Object(id=secret_manager.get_secret("GUILD_ID"))
+    guild = discord.Object(id=get_secret("GUILD_ID"))
     intents = discord.Intents.default()
     return Bot("Add description", intents, guild)
 
@@ -47,4 +40,4 @@ async def ping(interaction: Interaction):
 
 
 if __name__ == '__main__':
-    bot.run(secret_manager.get_secret("BOT_TOKEN"))
+    bot.run(get_secret("BOT_TOKEN"))
