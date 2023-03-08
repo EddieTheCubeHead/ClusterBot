@@ -48,7 +48,7 @@ jobs:
         with:
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY_PRIVATE }}
+          key: ${{ secrets.SSHKEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           envs: IMAGE_NAME,REGISTRY_URL,{{ secrets.DIGITAL_OCEAN_API_KEY }},GITHUB_SHA
           script: |
