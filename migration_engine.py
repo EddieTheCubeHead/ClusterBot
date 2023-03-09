@@ -1,9 +1,10 @@
 import sqlite3
 import os
 
+_path_here = os.getcwd()
 _DB_FILE = "persistence/bot_db.sqlite"
 _MIGRATION_FILE_FOLDER = "db/migrations"
-_con = sqlite3.connect(_DB_FILE)
+_con = sqlite3.connect(f"{_path_here}/{_DB_FILE}")
 
 
 def on_deploy():
