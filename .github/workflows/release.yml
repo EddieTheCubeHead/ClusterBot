@@ -55,4 +55,5 @@ jobs:
             docker login -u ${{ secrets.DIGITAL_OCEAN_API_KEY }} -p ${{ secrets.DIGITAL_OCEAN_API_KEY }} registry.digitalocean.com
             docker stop $(echo $IMAGE_NAME)
             docker rm $(echo $IMAGE_NAME)
-            docker compose up --env BOT_TOKEN=${{ secrets.TOKEN }} --env GUILD_ID=${{ secrets.TEST_GUILD_ID }}
+            docker compose build
+            docker compose run --env BOT_TOKEN=${{ secrets.TOKEN }} --env GUILD_ID=${{ secrets.TEST_GUILD_ID }}
