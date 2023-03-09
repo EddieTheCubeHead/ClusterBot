@@ -12,7 +12,7 @@ on:
 
 env:
   REGISTRY_URL: "registry.digitalocean.com/cluster-bot-registry"
-  IMAGE_NAME: "clusterbot"
+  IMAGE_NAME: "bot"
 
 jobs:
   build_and_push:
