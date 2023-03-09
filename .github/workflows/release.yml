@@ -56,4 +56,4 @@ jobs:
             docker stop $(echo $IMAGE_NAME)
             docker rm $(echo $IMAGE_NAME)
             docker compose build
-            docker compose run --env BOT_TOKEN=${{ secrets.TOKEN }} --env GUILD_ID=${{ secrets.TEST_GUILD_ID }}
+            docker compose run --env BOT_TOKEN=${{ secrets.TOKEN }} --env GUILD_ID=${{ secrets.TEST_GUILD_ID }} $(echo IMAGE_NAME)
