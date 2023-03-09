@@ -4,4 +4,4 @@ services:
     build: .
     hostname: bot
     volumes:
-      - /app/persistence:/app/persistence
+      - /app/persistence:/persistence
