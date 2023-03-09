@@ -1,7 +1,5 @@
 FROM python:3.11-alpine3.17
 
-ARG BOT_TOKEN
-
 WORKDIR /app
 
 COPY requirements.txt ./
