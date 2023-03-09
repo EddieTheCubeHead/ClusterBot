@@ -4,6 +4,7 @@ import os
 _path_here = os.getcwd()
 print(_path_here)
 print(os.listdir("."))
+print(os.listdir(".."))
 _DB_FILE = "persistence/bot_db.sqlite"
 _MIGRATION_FILE_FOLDER = "db/migrations"
 _con = sqlite3.connect(f"{_path_here}/{_DB_FILE}")
