@@ -5,6 +5,8 @@ import discord
 from discord import Client, Intents, Interaction
 from discord.app_commands import CommandTree
 
+from migration_engine import on_deploy, get_latest_migrated
+
 
 def get_secret(secret_name: str) -> str | int:
     secret = os.getenv(secret_name, None)
@@ -39,5 +41,11 @@ async def ping(interaction: Interaction):
     await interaction.response.send_message("pong", ephemeral=True)
 
 
+@bot.tree.command(name="test")
+async def test(interaction: Interaction):
+    await interaction.response.send_message(f"Latest migrated is {get_latest_migrated()}", ephemeral=True)
+
+
 if __name__ == '__main__':
+    on_deploy()
     bot.run(get_secret("BOT_TOKEN"))
