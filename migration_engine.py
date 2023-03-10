@@ -2,9 +2,6 @@ import sqlite3
 import os
 
 _path_here = os.getcwd()
-print(_path_here)
-print(os.listdir("."))
-print(os.listdir(".."))
 _DB_FILE = "persistence/bot_db.sqlite"
 _MIGRATION_FILE_FOLDER = "db/migrations"
 _con = sqlite3.connect(f"{_path_here}/{_DB_FILE}")
@@ -26,14 +23,28 @@ def get_latest_migrated() -> int:
 
 
 def _run_migrations(latest_migrated: int) -> int:
-    max_migrated = latest_migrated
+    scripts = _get_scripts_to_run(latest_migrated)
+    max_migrated = _run_scripts(latest_migrated, scripts)
+    return max_migrated
+
+
+def _run_scripts(max_migrated, scripts):
+    for file_name in [script[1] for script in scripts]:
+        print(f"Running migration script '{file_name}'")
+        with open(f"{_MIGRATION_FILE_FOLDER}/{file_name}", "r", encoding="utf-8") as script:
+            _con.executescript(script.read())
+            _con.commit()
+        max_migrated = max(int(file_name.split("_")[0]), max_migrated)
+    return max_migrated
+
+
+def _get_scripts_to_run(latest_migrated):
+    scripts = []
     for file in os.listdir(_MIGRATION_FILE_FOLDER):
         if _should_read(file, latest_migrated):
-            with open(f"{_MIGRATION_FILE_FOLDER}/{file}", "r", encoding="utf-8") as script:
-                _con.executescript(script.read())
-                _con.commit()
-            max_migrated = max(int(file.split("_")[0]), max_migrated)
-    return max_migrated
+            scripts.append((int(file.split("_")[0]), file))
+    scripts.sort(key=lambda x: x[0])
+    return scripts
 
 
 def _should_read(file_name: str, latest_migrated: int) -> bool:
