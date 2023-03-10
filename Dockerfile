@@ -1,5 +1,6 @@
 FROM python:3.11-alpine3.17
 
+VOLUME /app/persistence
 WORKDIR /app
 
 COPY requirements.txt ./

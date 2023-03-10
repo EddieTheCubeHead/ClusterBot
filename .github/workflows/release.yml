@@ -56,4 +56,4 @@ jobs:
             docker stop $(echo $IMAGE_NAME)
             docker rm $(echo $IMAGE_NAME)
             docker run -d --restart always -e BOT_TOKEN=${{ secrets.TOKEN }} -e GUILD_ID=${{ secrets.TEST_GUILD_ID }} \
-            --name $(echo $IMAGE_NAME) -v clusterbot-persistence:/app  $(echo $REGISTRY_URL)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            --name $(echo $IMAGE_NAME) $(echo $REGISTRY_URL)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
