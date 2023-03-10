@@ -1,7 +1,0 @@
-version: "4.17"
-services:
-  clusterbot:
-    build: .
-    hostname: clusterbot
-    volumes:
-      - ./persistence:/app/persistence
