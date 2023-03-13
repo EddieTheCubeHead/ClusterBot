@@ -3,7 +3,7 @@ name: Bug report
 about: Report a bug with the bot
 title: ''
 labels: bug
-assignees: EddieTheCubeHead
+assignees: ''
 
 ---
 
