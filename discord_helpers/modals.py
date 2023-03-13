@@ -1,6 +1,7 @@
 import discord.ui
 from discord import Interaction
 
+from discord_helpers import procedures
 from services import authorization_code_service
 
 
@@ -19,8 +20,4 @@ class RegistrationModal(discord.ui.Modal, title="Registration codes"):
             await interaction.response.send_message(f"Error occurred while validating codes: {exception}",
                                                     ephemeral=True)
             return
-        await register_user(interaction)
-
-
-async def register_user(interaction: Interaction):
-    await interaction.response.send_message("Registered :D", ephemeral=True)
+        await procedures.register_user(interaction)

@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 
@@ -5,6 +6,7 @@ import discord
 from discord import Client, Intents, Permissions, Interaction
 from discord.app_commands import CommandTree, default_permissions, autocomplete
 
+from db.repositories import user_repository
 from discord_helpers import modals
 from discord_helpers.autocompletes import autocomplete_student_email
 from migration_engine import on_deploy
@@ -60,6 +62,9 @@ async def generate_guild_authorization_code(interaction: Interaction):
 @bot.tree.command(name="register-as-member")
 @autocomplete(email=autocomplete_student_email)
 async def register_as_member(interaction: Interaction, email: str):
+    if user_repository.is_verified(interaction.user.id, datetime.timedelta(days=200)):
+        await interaction.response.send_message("Already verified", ephemeral=True)
+        return
     if not email_service.validate_student_email(email):
         await interaction.response.send_message(f"Only '@student.lut.fi'-emails are supported.", ephemeral=True)
         return
