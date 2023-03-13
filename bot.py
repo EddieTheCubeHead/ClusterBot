@@ -2,10 +2,14 @@ import json
 import os
 
 import discord
-from discord import Client, Intents, Interaction
-from discord.app_commands import CommandTree
+from discord import Client, Intents, Permissions, Interaction
+from discord.app_commands import CommandTree, default_permissions, autocomplete
 
-from migration_engine import on_deploy, get_latest_migrated
+from discord_helpers import modals
+from discord_helpers.autocompletes import autocomplete_student_email
+from migration_engine import on_deploy
+from services import authorization_code_service, email_service
+
 
 
 def get_secret(secret_name: str) -> str | int:
@@ -34,6 +38,11 @@ def setup_bot() -> Bot:
 
 
 bot = setup_bot()
+email_client = email_service.EmailService(get_secret("EMAIL_PASSWORD"))
+
+
+moderator_permissions = Permissions.none().moderate_members = True
+admin_permissions = Permissions.all()
 
 
 @bot.tree.command(name="ping")
@@ -41,9 +50,22 @@ async def ping(interaction: Interaction):
     await interaction.response.send_message("pong", ephemeral=True)
 
 
-@bot.tree.command(name="test")
-async def test(interaction: Interaction):
-    await interaction.response.send_message(f"Latest migrated is {get_latest_migrated()}", ephemeral=True)
+@bot.tree.command(name="generate-guild-code")
+@default_permissions(moderate_members=True)
+async def generate_guild_authorization_code(interaction: Interaction):
+    code = authorization_code_service.generate_guild_code(interaction.user.id)
+    await interaction.response.send_message(f"Code: `{code.code}`\n\nExpires at {code.expires_at}", ephemeral=True)
+
+
+@bot.tree.command(name="register-as-member")
+@autocomplete(email=autocomplete_student_email)
+async def register_as_member(interaction: Interaction, email: str):
+    if not email_service.validate_student_email(email):
+        await interaction.response.send_message(f"Only '@student.lut.fi'-emails are supported.", ephemeral=True)
+        return
+    code = authorization_code_service.generate_user_code(interaction.user.id)
+    email_client.send_email(email, f"Subject: Cluster discord registration code\n\n{code.code}")
+    await interaction.response.send_modal(modals.RegistrationModal())
 
 
 if __name__ == '__main__':
