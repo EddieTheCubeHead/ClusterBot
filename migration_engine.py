@@ -4,7 +4,7 @@ import os
 _path_here = os.getcwd()
 _DB_FILE = "persistence/bot_db.sqlite"
 _MIGRATION_FILE_FOLDER = "db/migrations"
-_con = sqlite3.connect(f"{_path_here}/{_DB_FILE}")
+con = sqlite3.connect(f"{_path_here}/{_DB_FILE}")
 
 
 def on_deploy():
@@ -16,7 +16,7 @@ def on_deploy():
 
 def get_latest_migrated() -> int:
     try:
-        latest_migrated = _con.execute("SELECT LastFile FROM Migrations ORDER BY CreatedAt DESC").fetchone()[0]
+        latest_migrated = con.execute("SELECT LastFile FROM Migrations ORDER BY CreatedAt DESC").fetchone()[0]
     except sqlite3.Error:
         latest_migrated = 0
     return latest_migrated
@@ -32,8 +32,8 @@ def _run_scripts(max_migrated, scripts):
     for file_name in [script[1] for script in scripts]:
         print(f"Running migration script '{file_name}'")
         with open(f"{_MIGRATION_FILE_FOLDER}/{file_name}", "r", encoding="utf-8") as script:
-            _con.executescript(script.read())
-            _con.commit()
+            con.executescript(script.read())
+            con.commit()
         max_migrated = max(int(file_name.split("_")[0]), max_migrated)
     return max_migrated
 
@@ -52,5 +52,5 @@ def _should_read(file_name: str, latest_migrated: int) -> bool:
 
 
 def _set_last_migration(file_number: int):
-    _con.execute("INSERT INTO Migrations (LastFile) VALUES (?)", (file_number,))
-    _con.commit()
+    con.execute("INSERT INTO Migrations (LastFile) VALUES (?)", (file_number,))
+    con.commit()
