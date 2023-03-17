@@ -51,7 +51,7 @@ admin_permissions = Permissions.all()
 @bot.event
 async def on_ready():
     print("Connected")
-    await roles.ensure_roles(bot.get_guild(get_secret("GUILD_ID")))
+    await roles.ensure_roles(await bot.fetch_guild(get_secret("GUILD_ID")))
 
 
 @bot.tree.command(name="ping")
