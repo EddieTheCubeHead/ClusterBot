@@ -87,17 +87,17 @@ class AutoKick(discord.app_commands.Group):
     @app_commands.command()
     async def start(self, interaction: Interaction):
         kick_unregistered.start()
-        await interaction.response.send_message("Now auto-kicking unregistered users")
+        await interaction.response.send_message("Now auto-kicking unregistered users", ephemeral=True)
 
     @app_commands.command()
     async def stop(self, interaction: Interaction):
         kick_unregistered.stop()
-        await interaction.response.send_message("No longer auto-kicking unregistered users")
+        await interaction.response.send_message("No longer auto-kicking unregistered users", ephemeral=True)
 
     @app_commands.command()
     async def restart(self, interaction: Interaction):
         kick_unregistered.restart()
-        await interaction.response.send_message("Restarted the auto-kicking of unregistered users")
+        await interaction.response.send_message("Restarted the auto-kicking of unregistered users", ephemeral=True)
 
 
 bot.tree.add_command(AutoKick())
