@@ -1,17 +1,22 @@
+import datetime
+
 import discord.ui
 from discord import Interaction
 
+from db.repositories.ballot_repository import add_vote, Ballot
 from discord_helpers import procedures
 from services import authorization_code_service
 
 
 class RegistrationModal(discord.ui.Modal, title="Registration codes"):
 
-    guild_code = discord.ui.TextInput(label="Give the code from guild",
-                                      placeholder="code")
+    def __init__(self, email: str):
+        super().__init__()
+        self._email = email
 
-    user_code = discord.ui.TextInput(label="Give the code from email.",
-                                     placeholder="code")
+    guild_code = discord.ui.TextInput(label="Give the code from guild", placeholder="code")
+
+    user_code = discord.ui.TextInput(label="Give the code from email.", placeholder="code")
 
     async def on_submit(self, interaction: Interaction):
         try:
@@ -20,4 +25,19 @@ class RegistrationModal(discord.ui.Modal, title="Registration codes"):
             await interaction.response.send_message(f"Error occurred while validating codes: {exception}",
                                                     ephemeral=True)
             return
-        await procedures.register_user(interaction)
+        await procedures.register_user(interaction, self._email)
+
+
+class BallotAddOptionModal(discord.ui.Modal, title="Add ballot options"):
+
+    def __init__(self, closes_at: datetime.datetime, name: str, description: str, options: int = 2):
+        super().__init__()
+        self._closes_at = closes_at
+        self._name = name
+        self._description = description
+        for option_num in range(1, options + 1):
+            self.add_item(discord.ui.TextInput(label=f"Option #{option_num}", placeholder="option"))
+
+    async def on_submit(self, interaction: Interaction):
+        options = [item.value for item in self.children]
+        await procedures.create_ballot_message(interaction, self._name, self._description, self._closes_at, options)
