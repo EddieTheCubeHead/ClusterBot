@@ -92,9 +92,10 @@ async def check_vote(interaction: Interaction, ballot_id: str):
     vote_hash = get_vote_hash(ballot_id, interaction.user.id)
     if vote_hash:
         await interaction.response.send_message(f"The hash of your vote for this ballot is '{vote_hash}'.",
-                                                ephemeral=True)
+                                                ephemeral=True, delete_after=120)
     else:
-        await interaction.response.send_message("It appears you haven't voted in this ballot.")
+        await interaction.response.send_message("It appears you haven't voted in this ballot.", ephemeral=True,
+                                                delete_after=60)
 
 
 @bot.tree.command(name="try-hash")
@@ -102,7 +103,7 @@ async def check_vote(interaction: Interaction, ballot_id: str):
 async def try_hash(interaction: Interaction, ballot_id: str, salt: str):
     ballot_id = int(ballot_id)
     ballot_hashes = get_ballot_hashes(ballot_id, salt)
-    await interaction.response.send_message(embed=from_ballot_hashes(ballot_hashes), ephemeral=True)
+    await interaction.response.send_message(embed=from_ballot_hashes(ballot_hashes), ephemeral=True, delete_after=120)
 
 
 @default_permissions(administrator=True)
