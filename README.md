@@ -13,7 +13,7 @@ The bot is currently planned to be used on the server for three main purposes:
 The features should be described in further detail in corresponding issues in the
 [bot's issue tracker](https://github.com/EddieTheCubeHead/ClusterBot/issues)
 
-## Contrubuting Guidlines
+## Contrubuting
 
-If you are looking to contribute ideas or bug reports, please go throught the contributing guidlines link
-[Contributing guidelines](https://github.com/EddieTheCubeHead/ClusterBot/blob/master/contributing.md)
+If you are looking to contribute code, ideas or bug reports, please check out the bot
+[contributing guidelines](https://github.com/EddieTheCubeHead/ClusterBot/blob/master/contributing.md)

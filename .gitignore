@@ -1,3 +1,3 @@
 /.idea
 /persistence
-/dev_secrets.json
+/configuration/dev_secrets.json

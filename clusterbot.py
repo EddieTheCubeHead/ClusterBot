@@ -1,26 +1,21 @@
 import datetime
-import json
-import os
-import time
 
 import discord
 from discord import Client, Intents, Permissions, Interaction, app_commands
-from discord.app_commands import CommandTree, default_permissions, autocomplete
+from discord.app_commands import CommandTree, default_permissions, autocomplete, Range
 from discord.ext import tasks
 
+from configuration.configuration_service import get_secret
 from db.repositories import user_repository
-from discord_helpers import modals, roles
-from discord_helpers.autocompletes import autocomplete_student_email
+from db.repositories.ballot_repository import get_vote_hash, get_ballot_hashes
+from discord_helpers import roles
+from discord_helpers.autocompletes import autocomplete_student_email, autocomplete_ballot_id
+from discord_helpers.embeds import from_ballot_hashes
+from discord_helpers.modals import RegistrationModal, BallotAddOptionModal
+from discord_helpers.procedures import kick_unregistered, close_ballots
 from migration_engine import on_deploy
 from services import authorization_code_service, email_service
-
-
-def get_secret(secret_name: str) -> str | int:
-    secret = os.getenv(secret_name, None)
-    if secret is None:
-        with open("dev_secrets.json", "r", encoding="utf-8") as secret_file:
-            secret = json.loads(secret_file.read())[secret_name]
-    return secret
+from services.vote_hasher import create_from_salt
 
 
 class ClusterBot(Client):
@@ -52,6 +47,7 @@ admin_permissions = Permissions.all()
 async def on_ready():
     print("Connected")
     await roles.ensure_roles(await bot.fetch_guild(get_secret("GUILD_ID")))
+    close_ballots_loop.start()
 
 
 @bot.tree.command(name="ping")
@@ -78,7 +74,36 @@ async def register_as_member(interaction: Interaction, email: str):
         return
     code = authorization_code_service.generate_user_code(interaction.user.id)
     email_client.send_email(email, f"Subject: Cluster discord registration code\n\n{code.code}")
-    await interaction.response.send_modal(modals.RegistrationModal())
+    await interaction.response.send_modal(RegistrationModal(email))
+
+
+@bot.tree.command()
+async def ballot(interaction: Interaction, name: str, description: str, hours: int, minutes: Range[int, 0, 60],
+                 option_count: Range[int, 2, 25]):
+    now_utc = datetime.datetime.now().astimezone(datetime.timezone.utc)
+    end_timestamp = (now_utc + datetime.timedelta(hours=hours, minutes=minutes))
+    await interaction.response.send_modal(BallotAddOptionModal(end_timestamp, name, description, option_count))
+
+
+@bot.tree.command(name="check-vote")
+@autocomplete(ballot_id=autocomplete_ballot_id)
+async def check_vote(interaction: Interaction, ballot_id: str):
+    ballot_id = int(ballot_id)
+    vote_hash = get_vote_hash(ballot_id, interaction.user.id)
+    if vote_hash:
+        await interaction.response.send_message(f"The hash of your vote for this ballot is '{vote_hash}'.",
+                                                ephemeral=True, delete_after=120)
+    else:
+        await interaction.response.send_message("It appears you haven't voted in this ballot.", ephemeral=True,
+                                                delete_after=60)
+
+
+@bot.tree.command(name="try-hash")
+@autocomplete(ballot_id=autocomplete_ballot_id)
+async def try_hash(interaction: Interaction, ballot_id: str, salt: str):
+    ballot_id = int(ballot_id)
+    ballot_hashes = get_ballot_hashes(ballot_id, salt)
+    await interaction.response.send_message(embed=from_ballot_hashes(ballot_hashes), ephemeral=True, delete_after=120)
 
 
 @default_permissions(administrator=True)
@@ -86,33 +111,31 @@ class AutoKick(discord.app_commands.Group):
 
     @app_commands.command()
     async def start(self, interaction: Interaction):
-        kick_unregistered.start()
-        await interaction.response.send_message("Now auto-kicking unregistered users")
+        kick_unregistered_task.start()
+        await interaction.response.send_message("Now auto-kicking unregistered users", ephemeral=True)
 
     @app_commands.command()
     async def stop(self, interaction: Interaction):
-        kick_unregistered.stop()
-        await interaction.response.send_message("No longer auto-kicking unregistered users")
+        kick_unregistered_task.stop()
+        await interaction.response.send_message("No longer auto-kicking unregistered users", ephemeral=True)
 
     @app_commands.command()
     async def restart(self, interaction: Interaction):
-        kick_unregistered.restart()
-        await interaction.response.send_message("Restarted the auto-kicking of unregistered users")
+        kick_unregistered_task.restart()
+        await interaction.response.send_message("Restarted the auto-kicking of unregistered users", ephemeral=True)
 
 
 bot.tree.add_command(AutoKick())
 
 
 @tasks.loop(minutes=10)
-async def kick_unregistered():
-    async for member in bot.get_guild(get_secret("GUILD_ID")).fetch_members():
-        if (not user_repository.is_verified(member.id)
-                and not member.bot
-                and member.joined_at + datetime.timedelta(days=1) < datetime.datetime.now(datetime.timezone.utc)):
-            await member.kick(reason="Not registered as a guild member")
-            print(f"Kicked {member.name}")
-        else:
-            print(f"Did not kick {member.name}")
+async def kick_unregistered_task():
+    await kick_unregistered(bot.get_guild(get_secret("GUILD_ID")))
+
+
+@tasks.loop(seconds=10)
+async def close_ballots_loop():
+    await close_ballots(bot.get_guild(get_secret("GUILD_ID")))
 
 
 if __name__ == '__main__':
