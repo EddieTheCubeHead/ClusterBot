@@ -7,9 +7,10 @@ from discord.ext import tasks
 
 from configuration.configuration_service import get_secret
 from db.repositories import user_repository
-from db.repositories.ballot_repository import get_vote_hash
+from db.repositories.ballot_repository import get_vote_hash, get_ballot_hashes
 from discord_helpers import roles
 from discord_helpers.autocompletes import autocomplete_student_email, autocomplete_ballot_id
+from discord_helpers.embeds import from_ballot_hashes
 from discord_helpers.modals import RegistrationModal, BallotAddOptionModal
 from discord_helpers.procedures import kick_unregistered, close_ballots
 from migration_engine import on_deploy
@@ -97,10 +98,11 @@ async def check_vote(interaction: Interaction, ballot_id: str):
 
 
 @bot.tree.command(name="try-hash")
-async def try_hash(interaction: Interaction, option_name: str, salt: str):
-    hashed_option = create_from_salt(option_name, salt)
-    message = f"Vote '{option_name}' with salt '{salt}' would give the hash '{hashed_option}'."
-    await interaction.response.send_message(message, ephemeral=True)
+@autocomplete(ballot_id=autocomplete_ballot_id)
+async def try_hash(interaction: Interaction, ballot_id: str, salt: str):
+    ballot_id = int(ballot_id)
+    ballot_hashes = get_ballot_hashes(ballot_id, salt)
+    await interaction.response.send_message(embed=from_ballot_hashes(ballot_hashes), ephemeral=True)
 
 
 @default_permissions(administrator=True)

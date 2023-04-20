@@ -3,7 +3,7 @@ from discord import Interaction
 
 from configuration.configuration_service import get_secret
 from db.repositories.ballot_repository import add_vote, Ballot, fetch_ballot, verify_vote
-from db.repositories.user_repository import get_user
+from db.repositories.user_repository import get_user, is_verified
 from discord_helpers.embeds import from_ballot
 from services.email_service import EmailService
 from services.vote_hasher import create_hash
@@ -19,6 +19,7 @@ class BallotOptionButton(discord.ui.Button):
         self._email_service = email_service
 
     async def callback(self, interaction: Interaction):
+        _verify_voter(interaction)
         verify_vote(self._ballot_id, interaction.user.id)
         ballot = fetch_ballot(self._ballot_id)
         hashed_vote = create_hash(self.label)
@@ -33,6 +34,11 @@ class BallotOptionButton(discord.ui.Button):
                   f"/check-vote [ballot_id] to get the saved hash and /try-hash [option-name] [salt] to compare " \
                   f"your hash to the saved hash if you want to verify your vote later."
         self._email_service.send_email(get_user(interaction.user.id).email, f"Subject: {subject}\n\n{content}")
+
+
+def _verify_voter(interaction: Interaction):
+    if not is_verified(interaction.user.id):
+        raise Exception("Unverified user.")  # TODO: replace with proper error handling as a part of issue #9
 
 
 class BallotView(discord.ui.View):

@@ -3,8 +3,7 @@ import time
 
 from discord import Embed
 
-from db.repositories.ballot_repository import Ballot
-
+from db.repositories.ballot_repository import Ballot, BallotHashes
 
 _CLUSTER_RED = 0xd52020
 _UTC = datetime.timezone.utc
@@ -27,6 +26,14 @@ def from_ballot(ballot: Ballot) -> Embed:
 
 def creating_ballot() -> Embed:
     return _cluster_embed(title="Creating ballot...", description="This shouldn't take long.")
+
+
+def from_ballot_hashes(ballot_hashes: BallotHashes) -> Embed:
+    embed = _cluster_embed(title=ballot_hashes.ballot_name,
+                           description="Hashes for all options of the ballot with the given salt")
+    for option_hash in ballot_hashes.option_hashes:
+        embed.add_field(name=option_hash.option_name, value=option_hash.option_hash, inline=False)
+    return embed
 
 
 def _get_closed_status(ballot: Ballot) -> str:

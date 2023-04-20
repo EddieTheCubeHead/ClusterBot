@@ -40,4 +40,11 @@ class BallotAddOptionModal(discord.ui.Modal, title="Add ballot options"):
 
     async def on_submit(self, interaction: Interaction):
         options = [item.value for item in self.children]
+        _validate_options(options)
         await procedures.create_ballot_message(interaction, self._name, self._description, self._closes_at, options)
+
+
+def _validate_options(options: list[str]):
+    if len(options) != len(set(options)):
+        # TODO: replace with proper error handling as a part of issue #9
+        raise Exception("Cannot give multiple identical options!")

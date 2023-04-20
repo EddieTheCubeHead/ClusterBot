@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from discord import Message
 
 from migration_engine import con
-
+from services.vote_hasher import create_from_salt
 
 _UTC = datetime.timezone.utc
 
@@ -32,6 +32,18 @@ class Ballot:
     @property
     def is_closed(self) -> bool:
         return self.closes_at > datetime.datetime.now().astimezone(_UTC)
+
+
+@dataclass
+class OptionHash:
+    option_name: str
+    option_hash: str
+
+
+@dataclass
+class BallotHashes:
+    ballot_name: str
+    option_hashes: list[OptionHash]
 
 
 def create_ballot(message: Message, creator_id: int, name: str, description: str, closes_at: datetime.datetime,
@@ -121,3 +133,9 @@ def get_user_ballot_ids(user_id: int) -> list[Ballot]:
                               "        ORDER BY B.Closed DESC, B.ClosesAt DESC",
                               (user_id,)).fetchall()
     return create_ballots_from_data(ballot_data)
+
+
+def get_ballot_hashes(ballot_id: int, salt: str) -> BallotHashes:
+    ballot = fetch_ballot(ballot_id)
+    option_hashes = [OptionHash(option.name, create_from_salt(option.name, salt)) for option in ballot.options]
+    return BallotHashes(ballot.name, option_hashes)
