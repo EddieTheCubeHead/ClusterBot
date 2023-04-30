@@ -1,4 +1,5 @@
 import datetime
+from logging import getLogger
 
 from discord import Interaction, Guild, TextChannel
 
@@ -7,6 +8,8 @@ from db.repositories.ballot_repository import create_ballot, fetch_ballots_to_cl
 from discord_helpers.embeds import from_ballot, creating_ballot
 from discord_helpers.views import BallotView
 
+_logger = getLogger("bot.procedures")
+
 
 async def kick_unregistered(guild: Guild):
     async for member in guild.fetch_members():
@@ -14,9 +17,9 @@ async def kick_unregistered(guild: Guild):
                 and not member.bot
                 and member.joined_at + datetime.timedelta(days=1) < datetime.datetime.now(datetime.timezone.utc)):
             await member.kick(reason="Not registered as a guild member")
-            print(f"Kicked {member.name}")
+            _logger.debug(f"Kicked {member.name}")
         else:
-            print(f"Did not kick {member.name}")
+            _logger.debug(f"Did not kick {member.name}")
 
 
 async def register_user(interaction: Interaction, email: str):

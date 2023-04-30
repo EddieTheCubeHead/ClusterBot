@@ -1,10 +1,14 @@
+from logging import getLogger
+
 from discord import Guild
 
 from db.repositories import role_repository
 
+_logger = getLogger("bot.roles")
+
 
 async def ensure_roles(guild: Guild):
-    print(f"Ensuring roles for guild '{guild.name}'")
+    _logger.info(f"Ensuring roles for guild '{guild.name}'")
     role_data = role_repository.get_uninitialized_roles()
     for name, colour in role_data:
         await _ensure_role(guild, name, colour)
