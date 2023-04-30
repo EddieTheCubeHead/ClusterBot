@@ -1,4 +1,5 @@
 import datetime
+from logging import getLogger
 
 import discord
 from discord import Client, Intents, Permissions, Interaction, app_commands
@@ -15,7 +16,10 @@ from discord_helpers.modals import RegistrationModal, BallotAddOptionModal
 from discord_helpers.procedures import kick_unregistered, close_ballots
 from migration_engine import on_deploy
 from services import authorization_code_service, email_service
-from services.vote_hasher import create_from_salt
+from services.logging_service import setup_logging
+
+
+_logger = None
 
 
 class ClusterBot(Client):
@@ -45,7 +49,7 @@ admin_permissions = Permissions.all()
 
 @bot.event
 async def on_ready():
-    print("Connected")
+    _logger.info("Connected")
     await roles.ensure_roles(await bot.fetch_guild(get_secret("GUILD_ID")))
     close_ballots_loop.start()
 
@@ -139,5 +143,7 @@ async def close_ballots_loop():
 
 
 if __name__ == '__main__':
+    setup_logging()
+    _logger = getLogger("bot.main")
     on_deploy()
-    bot.run(get_secret("BOT_TOKEN"))
+    bot.run(get_secret("BOT_TOKEN"), log_handler=None)

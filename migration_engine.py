@@ -1,6 +1,8 @@
 import sqlite3
 import os
+from logging import getLogger
 
+_logger = getLogger("bot.migration")
 _path_here = os.getcwd()
 _DB_FILE = "persistence/bot_db.sqlite"
 _MIGRATION_FILE_FOLDER = "db/migrations"
@@ -30,7 +32,7 @@ def _run_migrations(latest_migrated: int) -> int:
 
 def _run_scripts(max_migrated, scripts):
     for file_name in [script[1] for script in scripts]:
-        print(f"Running migration script '{file_name}'")
+        _logger.info(f"Running migration script '{file_name}'")
         with open(f"{_MIGRATION_FILE_FOLDER}/{file_name}", "r", encoding="utf-8") as script:
             con.executescript(script.read())
             con.commit()
