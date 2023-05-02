@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
 from logging import getLogger
 
 from discord import Interaction
 from discord.app_commands import CommandTree, AppCommandError
+from discord.ui import Modal, Button, View, Item
 
 from discord_helpers.embeds import from_exception_message
 
@@ -35,6 +35,24 @@ class InternalException(BotException):
 class ExceptionCatcherCommandTree(CommandTree):
 
     async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, BotException):
+            await error.handle(interaction)
+        else:
+            await super().on_error(interaction, error)
+
+
+class ExceptionCatcherModal(Modal):
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, BotException):
+            await error.handle(interaction)
+        else:
+            await super().on_error(interaction, error)
+
+
+class ExceptionCatcherView(View):
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError, item: Item):
         if isinstance(error, BotException):
             await error.handle(interaction)
         else:

@@ -10,7 +10,7 @@ from configuration.configuration_service import get_secret
 from db.repositories import user_repository
 from db.repositories.ballot_repository import get_vote_hash, get_ballot_hashes
 from discord_helpers import roles
-from discord_helpers.ExceptionCatcherCommandTree import ExceptionCatcherCommandTree
+from discord_helpers.exception_handling import ExceptionCatcherCommandTree
 from discord_helpers.autocompletes import autocomplete_student_email, autocomplete_ballot_id
 from discord_helpers.embeds import from_ballot_hashes
 from discord_helpers.modals import RegistrationModal, BallotAddOptionModal

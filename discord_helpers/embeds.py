@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import datetime
-import time
+from typing import TYPE_CHECKING
 
 from discord import Embed
 
-from db.repositories.ballot_repository import Ballot, BallotHashes
+if TYPE_CHECKING:
+    from db.repositories.ballot_repository import Ballot, BallotHashes
 
 _CLUSTER_RED = 0xd52020
 _UTC = datetime.timezone.utc
