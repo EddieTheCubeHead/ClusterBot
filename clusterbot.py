@@ -3,13 +3,14 @@ from logging import getLogger
 
 import discord
 from discord import Client, Intents, Permissions, Interaction, app_commands
-from discord.app_commands import CommandTree, default_permissions, autocomplete, Range
+from discord.app_commands import default_permissions, autocomplete, Range
 from discord.ext import tasks
 
 from configuration.configuration_service import get_secret
 from db.repositories import user_repository
 from db.repositories.ballot_repository import get_vote_hash, get_ballot_hashes
 from discord_helpers import roles
+from discord_helpers.ExceptionCatcherCommandTree import ExceptionCatcherCommandTree
 from discord_helpers.autocompletes import autocomplete_student_email, autocomplete_ballot_id
 from discord_helpers.embeds import from_ballot_hashes
 from discord_helpers.modals import RegistrationModal, BallotAddOptionModal
@@ -25,7 +26,7 @@ _logger = None
 class ClusterBot(Client):
     def __init__(self, description: str, intents: Intents, guild: discord.Object):
         super().__init__(description=description, intents=intents)
-        self.tree = CommandTree(self)
+        self.tree = ExceptionCatcherCommandTree(self)
         self._guild = guild
 
     async def setup_hook(self):

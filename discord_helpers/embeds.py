@@ -40,3 +40,7 @@ def _get_closed_status(ballot: Ballot) -> str:
     if ballot.is_closed:
         return f"Closes at <t:{int(ballot.closes_at.timestamp())}:F>"
     return f"Closed"
+
+
+def from_exception_message(message: str) -> Embed:
+    return _cluster_embed(title="An error occurred", description=message)
