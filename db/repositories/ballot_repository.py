@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from discord import Message
 
+from discord_helpers.exception_handling import UserException
 from migration_engine import con
 from services.vote_hasher import create_from_salt
 
@@ -85,7 +86,7 @@ def verify_vote(ballot_id: int, user_id: int):
     exists = con.execute("SELECT EXISTS(SELECT 1 FROM BallotUserVotes WHERE BallotID = ? AND UserID = ?)",
                          (ballot_id, user_id)).fetchone()[0]
     if exists:
-        raise Exception("Already voted!")  # TODO: replace with proper error handling as a part of issue #9
+        raise UserException("Already voted!")
 
 
 def add_vote(ballot_id: int, user_id: int, option_id: int, vote_hash: str) -> str:

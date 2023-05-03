@@ -3,12 +3,12 @@ import datetime
 import discord.ui
 from discord import Interaction
 
-from db.repositories.ballot_repository import add_vote, Ballot
 from discord_helpers import procedures
+from discord_helpers.exception_handling import UserException, ExceptionCatcherModal
 from services import authorization_code_service
 
 
-class RegistrationModal(discord.ui.Modal, title="Registration codes"):
+class RegistrationModal(ExceptionCatcherModal, title="Registration codes"):
 
     def __init__(self, email: str):
         super().__init__()
@@ -28,7 +28,7 @@ class RegistrationModal(discord.ui.Modal, title="Registration codes"):
         await procedures.register_user(interaction, self._email)
 
 
-class BallotAddOptionModal(discord.ui.Modal, title="Add ballot options"):
+class BallotAddOptionModal(ExceptionCatcherModal, title="Add ballot options"):
 
     def __init__(self, closes_at: datetime.datetime, name: str, description: str, options: int = 2):
         super().__init__()
@@ -46,5 +46,4 @@ class BallotAddOptionModal(discord.ui.Modal, title="Add ballot options"):
 
 def _validate_options(options: list[str]):
     if len(options) != len(set(options)):
-        # TODO: replace with proper error handling as a part of issue #9
-        raise Exception("Cannot give multiple identical options!")
+        raise UserException("Cannot give multiple identical options!")

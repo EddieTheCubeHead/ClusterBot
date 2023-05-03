@@ -1,8 +1,8 @@
 {
-  "DISCORD_LOG_FILE": "persistence/bot_log.log",
-  "DISCORD_LOG_STREAM": "stderr",
+  "DISCORD_LOG_FILE": null,
+  "DISCORD_LOG_STREAM": "stdout",
   "DISCORD_LOG_LEVEL": "INFO",
-  "BOT_LOG_FILE": "persistence/bot_log.log",
-  "BOT_LOG_STREAM": "stderr",
+  "BOT_LOG_FILE": null,
+  "BOT_LOG_STREAM": "stdout",
   "BOT_LOG_LEVEL": "DEBUG"
 }

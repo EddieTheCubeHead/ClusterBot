@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import datetime
-import time
+from typing import TYPE_CHECKING
 
 from discord import Embed
 
-from db.repositories.ballot_repository import Ballot, BallotHashes
+if TYPE_CHECKING:
+    from db.repositories.ballot_repository import Ballot, BallotHashes
 
 _CLUSTER_RED = 0xd52020
 _UTC = datetime.timezone.utc
@@ -40,3 +43,7 @@ def _get_closed_status(ballot: Ballot) -> str:
     if ballot.is_closed:
         return f"Closes at <t:{int(ballot.closes_at.timestamp())}:F>"
     return f"Closed"
+
+
+def from_exception_message(message: str) -> Embed:
+    return _cluster_embed(title="An error occurred", description=message)
