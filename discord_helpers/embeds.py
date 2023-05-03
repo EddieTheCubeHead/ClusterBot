@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 
 from discord import Embed
 
+from db.repositories.guild_code_repository import AuthorizationCode
+
 if TYPE_CHECKING:
     from db.repositories.ballot_repository import Ballot, BallotHashes
 
@@ -47,3 +49,9 @@ def _get_closed_status(ballot: Ballot) -> str:
 
 def from_exception_message(message: str) -> Embed:
     return _cluster_embed(title="An error occurred", description=message)
+
+
+def from_authorization_code(authorization_code: AuthorizationCode) -> Embed:
+    embed = _cluster_embed(title="Authorization code generated", description=authorization_code.code)
+    embed.add_field(name="Expires at", value=f"<t:{int(authorization_code.expires_at.timestamp())}:F>")
+    return embed

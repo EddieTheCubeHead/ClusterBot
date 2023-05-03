@@ -10,17 +10,34 @@ class AuthorizationCode:
         self.expires_at = created_at + datetime.timedelta(days=2)
 
 
-def insert(code: str, creator_id: int) -> AuthorizationCode:
-    created_at_raw = con.execute("INSERT INTO GuildVerifications (Code, CreatedBy) VALUES (?, ?) RETURNING CreatedAt",
-                                 (code, creator_id)).fetchone()[0]
-    created_at = datetime.datetime.strptime(created_at_raw, "%Y-%m-%d %H:%M:%S")
+def insert_guild_code(code: str, creator_id: int) -> AuthorizationCode:
+    created_at = datetime.datetime.now().astimezone(datetime.timezone.utc)
+    con.execute("INSERT INTO GuildVerifications (Code, CreatedBy, CreatedAt) VALUES (?, ?, ?)",
+                (code, creator_id, created_at))
     con.commit()
     return AuthorizationCode(code, created_at)
 
 
-def is_valid(code: str) -> bool:
+def is_valid_guild_code(code: str) -> bool:
     timestamp = con.execute("SELECT CreatedAt FROM GuildVerifications WHERE Code = ?", (code,)).fetchone()
     if timestamp is not None:
-        created_at = datetime.datetime.strptime(timestamp[0], "%Y-%m-%d %H:%M:%S")
-        return created_at + datetime.timedelta(days=2) > datetime.datetime.now()
+        created_at = datetime.datetime.strptime(timestamp[0], "%Y-%m-%d %H:%M:%S.%f%z")
+        return created_at + datetime.timedelta(days=2) > datetime.datetime.now().astimezone(datetime.timezone.utc)
+    return False
+
+
+def insert_user_code(code: str, creator_id: int) -> AuthorizationCode:
+    created_at = datetime.datetime.now().astimezone(datetime.timezone.utc)
+    con.execute("INSERT INTO EmailVerifications (Code, UserID, CreatedAt) VALUES (?, ?, ?)",
+                (code, creator_id, created_at))
+    con.commit()
+    return  AuthorizationCode(code, created_at)
+
+
+def is_valid_user_code(code: str, user_id: int) -> bool:
+    timestamp = con.execute("SELECT CreatedAt FROM EmailVerifications WHERE Code = ? AND UserID = ?", (code, user_id))\
+        .fetchone()
+    if timestamp is not None:
+        created_at = datetime.datetime.strptime(timestamp[0], "%Y-%m-%d %H:%M:%S.%f%z")
+        return created_at + datetime.timedelta(days=2) > datetime.datetime.now().astimezone(datetime.timezone.utc)
     return False
