@@ -4,5 +4,6 @@
   "DISCORD_LOG_LEVEL": "INFO",
   "BOT_LOG_FILE": null,
   "BOT_LOG_STREAM": "stdout",
-  "BOT_LOG_LEVEL": "DEBUG"
+  "BOT_LOG_LEVEL": "DEBUG",
+  "BOT_EMAIL": "cluster.guild.bot@gmail.com"
 }
