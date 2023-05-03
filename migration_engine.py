@@ -1,3 +1,4 @@
+import datetime
 import sqlite3
 import os
 from logging import getLogger
@@ -54,5 +55,6 @@ def _should_read(file_name: str, latest_migrated: int) -> bool:
 
 
 def _set_last_migration(file_number: int):
-    con.execute("INSERT INTO Migrations (LastFile) VALUES (?)", (file_number,))
+    created_at = datetime.datetime.now().astimezone(datetime.timezone.utc)
+    con.execute("INSERT INTO Migrations (LastFile, CreatedAt) VALUES (?, ?)", (file_number, created_at))
     con.commit()

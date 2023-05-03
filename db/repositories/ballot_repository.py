@@ -49,13 +49,14 @@ class BallotHashes:
 
 def create_ballot(message: Message, creator_id: int, name: str, description: str, closes_at: datetime.datetime,
                   option_names: list[str]) -> Ballot:
-    con.execute("INSERT INTO Ballots (ID, ChannelID,  CreatedBy, ClosesAt, Name, Description) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (message.id, message.channel.id, creator_id, closes_at, name, description))
+    created_at = datetime.datetime.now().astimezone(_UTC)
+    con.execute("INSERT INTO Ballots (ID, ChannelID,  CreatedBy, ClosesAt, CreatedAt, UpdatedAt, Name, Description) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (message.id, message.channel.id, creator_id, closes_at, created_at, created_at, name, description))
     options: list[BallotOption] = []
     for option_name in option_names:
-        option_id = con.execute("INSERT INTO BallotOptions (BallotID, Name) VALUES (?, ?) RETURNING ID",
-                                (message.id, option_name)).fetchone()[0]
+        option_id = con.execute("INSERT INTO BallotOptions (BallotID, Name, CreatedAt) VALUES (?, ?, ?) RETURNING ID",
+                                (message.id, option_name, created_at)).fetchone()[0]
         options.append(BallotOption(option_id, option_name))
     con.commit()
     return Ballot(message.id, message.channel.id, name, description, creator_id, closes_at, options,
@@ -90,9 +91,10 @@ def verify_vote(ballot_id: int, user_id: int):
 
 
 def add_vote(ballot_id: int, user_id: int, option_id: int, vote_hash: str) -> str:
+    created_at = datetime.datetime.now().astimezone(_UTC)
     con.execute("UPDATE BallotOptions SET Votes = Votes + 1 WHERE ID = ?", (option_id,))
-    con.execute("INSERT INTO BallotUserVotes (UserID, BallotID, Hash) VALUES (?, ?, ?)",
-                (user_id, ballot_id, vote_hash))
+    con.execute("INSERT INTO BallotUserVotes (UserID, BallotID, Hash, CreatedAt) VALUES (?, ?, ?, ?)",
+                (user_id, ballot_id, vote_hash, created_at))
     con.commit()
     return vote_hash
 

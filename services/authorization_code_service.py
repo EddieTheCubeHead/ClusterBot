@@ -1,9 +1,8 @@
 import string
 import random
 
-from db.repositories import guild_code_repository, user_code_repository
-from db.repositories.guild_code_repository import AuthorizationCode
-from db.repositories.user_code_repository import UserAuthorizationCode
+from db.repositories.guild_code_repository import AuthorizationCode, insert_guild_code, insert_user_code, \
+    is_valid_guild_code, is_valid_user_code
 
 
 class InvalidCode(Exception):
@@ -12,18 +11,18 @@ class InvalidCode(Exception):
 
 def generate_guild_code(user_id: int) -> AuthorizationCode:
     code = generate_random_code()
-    return guild_code_repository.insert(code, user_id)
+    return insert_guild_code(code, user_id)
 
 
-def generate_user_code(user_id: int) -> UserAuthorizationCode:
+def generate_user_code(user_id: int) -> AuthorizationCode:
     code = generate_random_code()
-    return user_code_repository.insert(code, user_id)
+    return insert_user_code(code, user_id)
 
 
 def validate_codes(guild_code: str, user_code: str, user_id: int) -> bool:
-    if not guild_code_repository.is_valid(guild_code):
+    if not is_valid_guild_code(guild_code):
         raise InvalidCode("Invalid guild code!")
-    if not user_code_repository.is_valid(user_code, user_id):
+    if not is_valid_user_code(user_code, user_id):
         raise InvalidCode("Invalid user code!")
 
 

@@ -12,7 +12,7 @@ from db.repositories.ballot_repository import get_vote_hash, get_ballot_hashes
 from discord_helpers import roles
 from discord_helpers.exception_handling import ExceptionCatcherCommandTree
 from discord_helpers.autocompletes import autocomplete_student_email, autocomplete_ballot_id
-from discord_helpers.embeds import from_ballot_hashes
+from discord_helpers.embeds import from_ballot_hashes, from_authorization_code
 from discord_helpers.modals import RegistrationModal, BallotAddOptionModal
 from discord_helpers.procedures import kick_unregistered, close_ballots
 from migration_engine import on_deploy
@@ -52,7 +52,10 @@ admin_permissions = Permissions.all()
 async def on_ready():
     _logger.info("Connected")
     await roles.ensure_roles(await bot.fetch_guild(get_secret("GUILD_ID")))
+    _logger.info(f"Roles ensured for all guilds")
+    _logger.info(f"Starting ballot closing task")
     close_ballots_loop.start()
+    _logger.info(f"Bot operational")
 
 
 @bot.tree.command(name="ping")
@@ -65,7 +68,8 @@ async def ping(interaction: Interaction):
 async def generate_guild_authorization_code(interaction: Interaction):
     user_repository.ensure_exists(interaction.user.id)
     code = authorization_code_service.generate_guild_code(interaction.user.id)
-    await interaction.response.send_message(f"Code: `{code.code}`\n\nExpires at {code.expires_at}", ephemeral=True)
+    embed = from_authorization_code(code)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 @bot.tree.command(name="register-as-member")
