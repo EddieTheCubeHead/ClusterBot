@@ -1,7 +1,7 @@
 import discord
 from discord import Interaction
 
-from configuration.configuration_service import get_secret
+from configuration.configuration_service import get_secret, get_config
 from db.repositories.ballot_repository import add_vote, Ballot, fetch_ballot, verify_vote
 from db.repositories.user_repository import get_user, is_verified
 from discord_helpers.exception_handling import UserException, ExceptionCatcherView
@@ -32,7 +32,7 @@ class BallotOptionButton(discord.ui.Button):
         subject = f"Ballot '{ballot.name}' vote saved"
         content = f"Your vote on the ballot '{ballot.name}' was saved by ClusterBot. The ballot ID is " \
                   f"{ballot.ballot_id}. The vote is hashed with the salt '{salt}'. Please use the command " \
-                  f"/check-vote [ballot_id] to get the saved hash and /try-hash [option-name] [salt] to compare " \
+                  f"/check-vote [ballot_id] to get the saved hash and /try-hash [ballot_id] [salt] to compare " \
                   f"your hash to the saved hash if you want to verify your vote later."
         self._email_service.send_email(get_user(interaction.user.id).email, f"Subject: {subject}\n\n{content}")
 
@@ -46,6 +46,6 @@ class BallotView(ExceptionCatcherView):
 
     def __init__(self, ballot: Ballot):
         super().__init__()
-        self._email_service = EmailService(get_secret("EMAIL_PASSWORD"))
+        self._email_service = EmailService(get_config("BOT_EMAIL", None), get_secret("EMAIL_PASSWORD", None))
         for option in ballot.options:
             self.add_item(BallotOptionButton(ballot.ballot_id, option.name, option.option_id, self._email_service))

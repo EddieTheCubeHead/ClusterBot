@@ -6,7 +6,7 @@ from discord import Client, Intents, Permissions, Interaction, app_commands
 from discord.app_commands import default_permissions, autocomplete, Range
 from discord.ext import tasks
 
-from configuration.configuration_service import get_secret
+from configuration.configuration_service import get_secret, get_config
 from db.repositories import user_repository
 from db.repositories.ballot_repository import get_vote_hash, get_ballot_hashes
 from discord_helpers import roles
@@ -42,7 +42,7 @@ def setup_bot() -> ClusterBot:
 
 
 bot = setup_bot()
-email_client = email_service.EmailService(get_secret("EMAIL_PASSWORD"))
+email_client = email_service.EmailService(get_config("BOT_EMAIL", None), get_secret("EMAIL_PASSWORD", None))
 
 moderator_permissions = Permissions.none().moderate_members = True
 admin_permissions = Permissions.all()

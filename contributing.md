@@ -45,6 +45,17 @@ Once you have both values, the file should look something like this:
 }
 ```
 
-You also need to add a folder named "persistence" in the root folder of the bot.
+You also need to add a folder named "persistence" in the root folder of the bot.  After that you can run the bot by 
+running bot.py with python.
 
-After that you can run the bot by running bot.py with python.
+## Configuring email credentials for development
+
+If you want to use the email functionality of the bot (ballots and verification), you need to supply a valid email 
+username and password. Username should be supplied in "config.json", under the "BOT_EMAIL" variable name. The 
+password should be supplied in "dev_secrets.json", under the "EMAIL_PASSWORD" variable name.
+
+## Configuring logging for development
+
+The bot's logging is controlled through variables found in "config.json". Discord.py logging and bot logging both 
+have their own logger. You can control the output file (null to not output to file), output stream (null to not 
+output to stream) and logging level for both by editing these variables accordingly.
